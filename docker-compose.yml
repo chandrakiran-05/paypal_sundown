@@ -1,14 +1,24 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_AG_GRID_LICENSE_KEY: ${NEXT_PUBLIC_AG_GRID_LICENSE_KEY:-${AG_STUDIO_LICENSE:-}}
     ports: ["3000:3000"]
     environment:
-      PAYPAL_MODE: replay
+      PAYPAL_MODE: ${PAYPAL_MODE:-replay}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-openrouter/auto}
       SUNDOWN_ROOT: /app
+      SUNDOWN_ADMIN_PASSWORD: ${SUNDOWN_ADMIN_PASSWORD:-}
+      SUNDOWN_APP_URL: ${SUNDOWN_APP_URL:-http://localhost:3000}
     volumes: ["sundown-data:/app/workspace"]
   legacy-shop:
     build: ./apps/legacy-shop
-    ports: ["8080:8080"]
+    ports: ["127.0.0.1:8080:8080"]
     environment:
       PAYPAL_MODE: replay
       SHOP_DB: /data/orders.sqlite

@@ -1,0 +1,38 @@
+--- a/openai/index.js
++++ b/openai/index.js
+@@ -39,7 +39,7 @@
+ var import_axios = __toESM(require("axios"));
+ 
+ // src/shared/parameters.ts
+-var import_zod = require("zod");
++var import_zod = require("zod/v3");
+ 
+ // src/shared/constants.ts
+ var updateSubscriptionPathMapping = {
+@@ -3242,7 +3242,7 @@
+ }
+ 
+ // node_modules/zod-to-json-schema/dist/esm/parseDef.js
+-var import_zod4 = require("zod");
++var import_zod4 = require("zod/v3");
+ 
+ // node_modules/zod-to-json-schema/dist/esm/parsers/any.js
+ function parseAnyDef() {
+@@ -3250,7 +3250,7 @@
+ }
+ 
+ // node_modules/zod-to-json-schema/dist/esm/parsers/array.js
+-var import_zod2 = require("zod");
++var import_zod2 = require("zod/v3");
+ function parseArrayDef(def, refs) {
+   const res = {
+     type: "array"
+@@ -3480,7 +3480,7 @@
+ }
+ 
+ // node_modules/zod-to-json-schema/dist/esm/parsers/record.js
+-var import_zod3 = require("zod");
++var import_zod3 = require("zod/v3");
+ 
+ // node_modules/zod-to-json-schema/dist/esm/parsers/string.js
+ var emojiRegex;

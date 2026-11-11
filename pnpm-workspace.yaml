@@ -1,6 +1,18 @@
 packages:
   - apps/web
   - packages/*
+# Only the OpenAI function-tool adapter is used; exclude unused vendor adapters.
+overrides:
+  "@paypal/agent-toolkit>ai": "-"
+  "@paypal/agent-toolkit>@langchain/core": "-"
+  "@paypal/agent-toolkit>@modelcontextprotocol/sdk": "-"
+  "@paypal/agent-toolkit>@dotenvx/dotenvx": "-"
+  "@paypal/agent-toolkit>fast-json-patch": "-"
+  "@paypal/agent-toolkit>mathjs": "15.2.0"
+  "@paypal/agent-toolkit>zod": "4.6.7"
+  "openai@4.86.1>zod": "4.6.7"
+patchedDependencies:
+  "@paypal/agent-toolkit@1.11.0": patches/paypal-agent-toolkit.patch
 allowBuilds:
   "@bryntum/gantt-trial": true
   "@bryntum/gantt-trial-lib": true

@@ -1,14 +1,17 @@
 /** Agent-demo shop persistence. Only a completed webhook moves an order to PAID. */
-import { DatabaseSync } from "node:sqlite";
+import { openDatabase, initializeSchema } from "./database";
 import path from "node:path";
 import { z } from "zod";
 import { root } from "./store";
-const db = new DatabaseSync(path.join(root, "workspace/sundown.sqlite"));
-db.exec(`CREATE TABLE IF NOT EXISTS agent_shop_orders(
+const db = openDatabase(path.join(root, "workspace/sundown.sqlite"));
+initializeSchema(
+  db,
+  `CREATE TABLE IF NOT EXISTS agent_shop_orders(
   id TEXT PRIMARY KEY, owner TEXT NOT NULL, site_id INTEGER NOT NULL,
   mode TEXT NOT NULL, amount TEXT NOT NULL, currency TEXT NOT NULL,
   capture_id TEXT, status TEXT NOT NULL, approval_url TEXT, created TEXT NOT NULL);
-  CREATE TABLE IF NOT EXISTS shop_webhooks(id TEXT PRIMARY KEY, mode TEXT NOT NULL, order_id TEXT NOT NULL)`);
+  CREATE TABLE IF NOT EXISTS shop_webhooks(id TEXT PRIMARY KEY, mode TEXT NOT NULL, order_id TEXT NOT NULL)`,
+);
 export type ShopOrder = {
   id: string;
   owner: string;

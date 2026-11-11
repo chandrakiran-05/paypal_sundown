@@ -3,7 +3,7 @@ services:
     name: sundown
     runtime: docker
     plan: starter
-    healthCheckPath: /api/state
+    healthCheckPath: /api/health
     envVars:
       - key: PAYPAL_MODE
         value: replay
@@ -11,11 +11,15 @@ services:
         value: 3000
       - key: SUNDOWN_ROOT
         value: /app
+      - key: SUNDOWN_ADMIN_PASSWORD
+        generateValue: true
+      - key: SUNDOWN_APP_URL
+        sync: false
     disk:
       name: sundown-data
       mountPath: /app/workspace
       sizeGB: 1
-  - type: web
+  - type: pserv
     name: sundown-legacy-shop
     runtime: docker
     dockerfilePath: apps/legacy-shop/Dockerfile

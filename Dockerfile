@@ -5,9 +5,14 @@ RUN corepack enable && corepack prepare pnpm@11.25.0 --activate
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/web/package.json apps/web/package.json
 COPY packages packages
+COPY patches patches
 RUN pnpm install --frozen-lockfile
 COPY . .
+ARG NEXT_PUBLIC_AG_GRID_LICENSE_KEY
+ENV NEXT_PUBLIC_AG_GRID_LICENSE_KEY=$NEXT_PUBLIC_AG_GRID_LICENSE_KEY
 RUN pnpm build
 ENV NODE_ENV=production PAYPAL_MODE=replay
+RUN mkdir -p /app/workspace && chown -R node:node /app
+USER node
 EXPOSE 3000
 CMD ["pnpm", "start"]

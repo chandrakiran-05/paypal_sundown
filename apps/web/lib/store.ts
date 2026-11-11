@@ -1,5 +1,5 @@
 /** SQLite-backed run state and SSE event journal; all paths stay under the workspace. */
-import { DatabaseSync } from "node:sqlite";
+import { openDatabase, initializeSchema } from "./database";
 import {
   mkdirSync,
   readFileSync,
@@ -29,8 +29,9 @@ export const root =
     ? path.resolve(process.cwd(), "../..")
     : process.cwd());
 mkdirSync(path.join(root, "workspace"), { recursive: true });
-const sql = new DatabaseSync(path.join(root, "workspace/sundown.sqlite"));
-sql.exec(
+const sql = openDatabase(path.join(root, "workspace/sundown.sqlite"));
+initializeSchema(
+  sql,
   "PRAGMA journal_mode=WAL; CREATE TABLE IF NOT EXISTS state(id TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS journal(id INTEGER PRIMARY KEY AUTOINCREMENT, created TEXT NOT NULL, message TEXT NOT NULL); CREATE TABLE IF NOT EXISTS webhook_events(id TEXT PRIMARY KEY, kind TEXT NOT NULL)",
 );
 export function getFlag(key: string) {

@@ -34,9 +34,36 @@ afterAll(() => {
   vi.restoreAllMocks();
   rmSync(dir, { recursive: true, force: true });
 });
+it("rejects malformed and oversized webhook bodies before signature verification", async () => {
+  const verify = vi.mocked(paypal.verifyWebhook);
+  verify.mockClear();
+  expect(
+    (
+      await route.POST(
+        new Request("http://localhost/api/webhooks", {
+          method: "POST",
+          body: "{",
+        }),
+      )
+    ).status,
+  ).toBe(400);
+  expect(
+    (
+      await route.POST(
+        new Request("http://localhost/api/webhooks", {
+          method: "POST",
+          body: " ".repeat(262145),
+        }),
+      )
+    ).status,
+  ).toBe(413);
+  expect(verify).not.toHaveBeenCalled();
+});
 it("rejects an unverified webhook without touching shop state; accepts and deduplicates a verified completion", async () => {
   const body = {
     id: "WH-123",
+    create_time: "2026-11-11T12:00:00Z",
+    resource_type: "capture",
     event_type: "PAYMENT.CAPTURE.COMPLETED",
     resource: {
       id: "CAP-123",
@@ -56,6 +83,9 @@ it("rejects an unverified webhook without touching shop state; accepts and dedup
   expect(shop.shopOrder("SANDBOXORDER", "owner").status).toBe("CREATED");
   vi.mocked(paypal.verifyWebhook).mockResolvedValue(true);
   const response = await route.POST(request());
+  expect(
+    JSON.stringify(vi.mocked(paypal.verifyWebhook).mock.calls.at(-1)![0]),
+  ).toBe(JSON.stringify(body));
   expect(response.status).toBe(200);
   expect((await response.json()).shop.applied).toBe(true);
   expect(shop.shopOrder("SANDBOXORDER", "owner").status).toBe("PAID");

@@ -8,3 +8,5 @@ output/
 .code-review-graph/
 .pnpm-store/
 .env.local
+
+.DS_Store

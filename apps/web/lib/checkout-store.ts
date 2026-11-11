@@ -1,10 +1,11 @@
 /** Durable sandbox ownership and idempotent write claims; no buyer or card data is stored. */
-import { DatabaseSync } from "node:sqlite";
+import { openDatabase, initializeSchema } from "./database";
 import path from "node:path";
 import { root } from "./store";
 import { PaypalError } from "./paypal";
-const db = new DatabaseSync(path.join(root, "workspace/sundown.sqlite"));
-db.exec(
+const db = openDatabase(path.join(root, "workspace/sundown.sqlite"));
+initializeSchema(
+  db,
   "CREATE TABLE IF NOT EXISTS checkout_orders(id TEXT PRIMARY KEY, owner TEXT NOT NULL, amount TEXT NOT NULL, capture_id TEXT, status TEXT NOT NULL); CREATE TABLE IF NOT EXISTS paypal_claims(id TEXT PRIMARY KEY, payload TEXT NOT NULL, request_id TEXT NOT NULL, state TEXT NOT NULL, result TEXT, updated INTEGER NOT NULL)",
 );
 export function ownOrder(id: string, owner: string) {

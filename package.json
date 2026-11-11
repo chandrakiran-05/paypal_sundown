@@ -15,6 +15,7 @@
     "record": "node --import tsx scripts/record.ts",
     "format": "prettier --write .",
     "smoke": "node --import tsx scripts/smoke.ts",
+    "smoke:production": "node scripts/production-smoke.mjs",
     "sundown": "node packages/cli/bin/sundown.mjs",
     "live:sandbox": "node --import tsx scripts/live-sandbox.ts",
     "live:sandbox:headed": "node --import tsx scripts/live-sandbox.ts --headed",

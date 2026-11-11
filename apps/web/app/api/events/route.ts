@@ -2,28 +2,50 @@
 import { snapshot } from "../../../lib/store";
 export const dynamic = "force-dynamic";
 export function GET(request: Request) {
-  let timer: ReturnType<typeof setInterval>;
+  let timer: ReturnType<typeof setInterval> | undefined;
+  let stopped = false;
+  let close: (() => void) | undefined;
+  const cleanup = () => {
+    stopped = true;
+    clearInterval(timer);
+    request.signal.removeEventListener("abort", abort);
+  };
+  const abort = () => {
+    cleanup();
+    close?.();
+  };
   const stream = new ReadableStream({
     start(controller) {
-      const send = () =>
-        controller.enqueue(
-          new TextEncoder().encode(
-            "data: " + JSON.stringify(snapshot()) + "\n\n",
-          ),
-        );
-      send();
-      timer = setInterval(send, 900);
-      request.signal.addEventListener("abort", () => {
-        clearInterval(timer);
+      close = () => {
         try {
           controller.close();
         } catch {
-          /* Stream already closed. */
+          /* Already closed. */
         }
-      });
+      };
+      const send = () => {
+        if (stopped) return;
+        try {
+          controller.enqueue(
+            new TextEncoder().encode(
+              "data: " + JSON.stringify(snapshot()) + "\n\n",
+            ),
+          );
+        } catch (error) {
+          cleanup();
+          controller.error(error);
+        }
+      };
+      if (request.signal.aborted) {
+        abort();
+        return;
+      }
+      request.signal.addEventListener("abort", abort, { once: true });
+      timer = setInterval(send, 900);
+      send();
     },
     cancel() {
-      clearInterval(timer);
+      cleanup();
     },
   });
   return new Response(stream, {
@@ -31,6 +53,7 @@ export function GET(request: Request) {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }

@@ -9,8 +9,20 @@ import { acceptWebhook } from "../../../lib/store";
 import { applyShopWebhook } from "../../../lib/agent-shop";
 export async function POST(request: Request) {
   try {
-    const event = webhookEventSchema.parse(await request.json());
-    if (!(await verifyWebhook(event, request.headers)))
+    if (Number(request.headers.get("content-length")) > 262144)
+      return Response.json(
+        { error: "Webhook body too large" },
+        { status: 413 },
+      );
+    const raw = await request.text();
+    if (Buffer.byteLength(raw) > 262144)
+      return Response.json(
+        { error: "Webhook body too large" },
+        { status: 413 },
+      );
+    const original: unknown = JSON.parse(raw);
+    const event = webhookEventSchema.parse(original);
+    if (!(await verifyWebhook(original, request.headers)))
       return Response.json(
         { error: "Invalid webhook signature" },
         { status: 400 },
@@ -22,7 +34,7 @@ export async function POST(request: Request) {
       shop,
     });
   } catch (error) {
-    if (error instanceof z.ZodError)
+    if (error instanceof z.ZodError || error instanceof SyntaxError)
       return Response.json(
         { error: "Invalid webhook event or signature metadata" },
         { status: 400 },

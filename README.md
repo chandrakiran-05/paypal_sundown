@@ -70,6 +70,8 @@ Reports live under `workspace/live-sandbox/<run-id>/report.json` and feed the Mi
 
 ## Migration Passport
 
+Production startup, authentication, persistent sandbox webhook configuration and validation limits are documented in [PRODUCTION.md](docs/PRODUCTION.md). `PAYPAL_MODE=live` remains sandbox-only; a production web build does not enable real-money transactions.
+
 In live comparisons, an empty legacy notification list does not establish Events parity. The matrix uses a neutral dash labelled **Not comparable: legacy IPN is unreachable from loopback**. Amount, State and DB row remain compared; a difference in those dimensions still fails. The legend distinguishes match, difference and neutral/not comparable. Passport JSON and PDF retain the exclusion and reason; “Compared dimensions match” does not claim that Events matched. Replay scenarios continue to compare their synthetic notifications normally.
 
 Open `/passport/1` for Horizon or `/passport/{id}` for any seeded site (1–12). Download PDF or JSON. **Reissue with current evidence & inputs** captures a new snapshot; existing downloaded files remain independently verifiable. Evidence includes parity outcomes with synthetic-replay provenance, sandbox order/capture IDs and DB settlement status, separately labelled Simulated IDs, a revenue-at-risk estimate, and a merchant sunset target/countdown.
@@ -131,7 +133,7 @@ flowchart LR
 - `PAYPAL_MODE=live` enables the official SDK API at `/api/orders` and the redirect checkout at `/checkout` for sandbox approval, capture and partial refund. Catalog prices are computed server-side. An HttpOnly browser cookie owns each order; durable write claims preserve request IDs across retries. It never falls back to fixtures. Run `pnpm live:sandbox` for successful checkout and partial refund with Playwright buyer approval; the other four scenarios remain Replay. The dashboard button directs live runs to this CLI. PHP NVP uses plain HTTP to sandbox. PHP migrated template uses sandbox REST.
 - `/api/webhooks` verifies signatures using PayPal's verification API before accepting a unique event ID and atomically marking matching agent-shop captures PAID. The installed SDK exposes no webhook controller, so verification uses HTTP. Replay requests cannot bypass verification.
 - `pnpm record` imports a six-scenario report from an external `LIVE_PARITY_REPORT_URL` when explicitly running live. It does not drive buyers or turn synthetic fixtures into recordings.
-- Never point the code at production. Production hosts are not configurable. Credentials and buyer data are never logged. Local APIs have no authentication: deploy behind access control before attaching secrets.
+- Never point the code at production. Production hosts are not configurable. Credentials and buyer data are never logged. Production workspace routes require HTTP Basic authentication (username `sundown`) with `SUNDOWN_ADMIN_PASSWORD` (at least 16 characters). Missing production access configuration returns 503. Webhooks authenticate through PayPal signatures; `/api/health` exposes only availability. Development remains locally accessible unless an admin password is configured.
 
 ## Sponsor-tool map
 
