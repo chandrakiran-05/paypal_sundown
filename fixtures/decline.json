@@ -1,0 +1,28 @@
+{
+  "id": "decline",
+  "label": "Instrument declined",
+  "provenance": "synthetic-replay",
+  "legacy": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "DECLINED",
+    "transitions": [
+      "CREATED",
+      "DECLINED"
+    ],
+    "dbRows": 1,
+    "notifications": []
+  },
+  "migrated": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "DECLINED",
+    "transitions": [
+      "CREATED",
+      "DECLINED"
+    ],
+    "dbRows": 1,
+    "notifications": []
+  },
+  "defect": "none"
+}

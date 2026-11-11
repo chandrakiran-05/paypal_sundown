@@ -1,0 +1,19 @@
+services:
+  web:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      PAYPAL_MODE: replay
+      SUNDOWN_ROOT: /app
+    volumes: ["sundown-data:/app/workspace"]
+  legacy-shop:
+    build: ./apps/legacy-shop
+    ports: ["8080:8080"]
+    environment:
+      PAYPAL_MODE: replay
+      SHOP_DB: /data/orders.sqlite
+      SHOP_BASE_URL: http://localhost:8080/
+    volumes: ["legacy-data:/data"]
+volumes:
+  sundown-data:
+  legacy-data:

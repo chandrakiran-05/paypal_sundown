@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: sundown
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/state
+    envVars:
+      - key: PAYPAL_MODE
+        value: replay
+      - key: PORT
+        value: 3000
+      - key: SUNDOWN_ROOT
+        value: /app
+    disk:
+      name: sundown-data
+      mountPath: /app/workspace
+      sizeGB: 1
+  - type: web
+    name: sundown-legacy-shop
+    runtime: docker
+    dockerfilePath: apps/legacy-shop/Dockerfile
+    dockerContext: apps/legacy-shop
+    plan: starter
+    envVars:
+      - key: PAYPAL_MODE
+        value: replay
+      - key: SHOP_DB
+        value: /data/orders.sqlite
+    disk:
+      name: legacy-orders
+      mountPath: /data
+      sizeGB: 1

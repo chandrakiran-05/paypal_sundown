@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env*
+!.env.example
+workspace/
+output/
+*.tsbuildinfo
+.code-review-graph/
+.pnpm-store/
+.env.local

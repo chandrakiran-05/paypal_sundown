@@ -1,0 +1,43 @@
+name: Sundown parity gate
+description: Compare synthetic parity scenarios and retain reports even when the gate fails.
+inputs:
+  fixtures:
+    description: Fixture directory relative to the caller workspace
+    default: fixtures
+  report-directory:
+    description: Artifact directory relative to the caller workspace
+    default: sundown-report
+  artifact-name:
+    description: Unique name for this job's artifact
+    default: sundown-parity
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+    - name: Locate verifier source
+      id: sundown-source
+      shell: bash
+      run: |
+        node --input-type=module -e 'import path from "node:path"; import { appendFileSync } from "node:fs"; appendFileSync(process.env.GITHUB_OUTPUT, "package-json=" + path.relative(process.env.GITHUB_WORKSPACE, path.resolve(process.env.GITHUB_ACTION_PATH, "../../../package.json")) + "\n");'
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 11.25.0
+        package_json_file: ${{ steps.sundown-source.outputs.package-json }}
+    - name: Install verifier
+      shell: bash
+      run: pnpm --dir "$GITHUB_ACTION_PATH/../../.." install --frozen-lockfile
+    - name: Verify parity
+      shell: bash
+      env:
+        SUNDOWN_FIXTURES: ${{ inputs.fixtures }}
+        SUNDOWN_REPORT: ${{ inputs.report-directory }}
+      run: node "$GITHUB_ACTION_PATH/../../../packages/cli/bin/sundown.mjs" verify --fixtures "$GITHUB_WORKSPACE/$SUNDOWN_FIXTURES" --output "$GITHUB_WORKSPACE/$SUNDOWN_REPORT"
+    - name: Upload evidence
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ github.workspace }}/${{ inputs.report-directory }}/
+        if-no-files-found: error

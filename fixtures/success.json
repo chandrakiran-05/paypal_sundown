@@ -1,0 +1,32 @@
+{
+  "id": "success",
+  "label": "Successful checkout",
+  "provenance": "synthetic-replay",
+  "legacy": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "COMPLETED",
+    "transitions": [
+      "CREATED",
+      "COMPLETED"
+    ],
+    "dbRows": 1,
+    "notifications": [
+      "captured"
+    ]
+  },
+  "migrated": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "COMPLETED",
+    "transitions": [
+      "CREATED",
+      "COMPLETED"
+    ],
+    "dbRows": 1,
+    "notifications": [
+      "captured"
+    ]
+  },
+  "defect": "none"
+}

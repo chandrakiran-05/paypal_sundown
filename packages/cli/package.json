@@ -1,0 +1,13 @@
+{
+  "name": "@sundown/cli",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "sundown": "bin/sundown.mjs"
+  },
+  "dependencies": {
+    "tsx": "^4.20.0",
+    "@sundown/engine": "workspace:*"
+  }
+}

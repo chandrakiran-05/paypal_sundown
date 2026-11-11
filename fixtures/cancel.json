@@ -1,0 +1,28 @@
+{
+  "id": "cancel",
+  "label": "Buyer cancellation",
+  "provenance": "synthetic-replay",
+  "legacy": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "CANCELLED",
+    "transitions": [
+      "CREATED",
+      "CANCELLED"
+    ],
+    "dbRows": 1,
+    "notifications": []
+  },
+  "migrated": {
+    "amount": "56.00",
+    "currency": "USD",
+    "status": "CANCELLED",
+    "transitions": [
+      "CREATED",
+      "CANCELLED"
+    ],
+    "dbRows": 1,
+    "notifications": []
+  },
+  "defect": "none"
+}

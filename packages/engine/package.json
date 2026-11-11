@@ -1,0 +1,14 @@
+{
+  "name": "@sundown/engine",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./verification": "./src/verification.ts",
+    "./passport": "./src/passport.ts",
+    "./live-evidence": "./src/live-evidence.ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  }
+}
