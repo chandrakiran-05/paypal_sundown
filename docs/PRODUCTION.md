@@ -14,7 +14,7 @@ Set `SUNDOWN_APP_URL` to the actual public HTTPS origin so authenticated browser
 
 For Docker Compose, provide configuration using `docker compose --env-file .env.local up --build`. The web container runs as the non-root `node` user. Its persistent `/app/workspace` must be writable by that user. The legacy reference shop binds only to loopback in Compose and is a private service in the Render blueprint. It remains a sandbox/reference fixture, not a public production payment storefront.
 
-Health monitoring uses unauthenticated `GET /api/health`, which checks database readability and returns no workspace details. All evidence, mutation, assistant and payment endpoints require workspace authentication in production. `/api/webhooks` is public only so PayPal can deliver events; it independently verifies signatures and rejects malformed/oversized events. Cross-origin authenticated mutations are rejected.
+Health monitoring uses unauthenticated `GET /api/health`, which checks database readability and production access readiness, returning no workspace details. Missing or short admin passwords return 503 so Render cannot mark a locked-out deployment healthy. The static landing page is public. All evidence, mutation, assistant and payment endpoints require workspace authentication in production. `/api/webhooks` is public only so PayPal can deliver events; it independently verifies signatures and rejects malformed/oversized events. Cross-origin authenticated mutations are rejected.
 
 SQLite storage requires one application instance and a persistent local disk. Back up the database using SQLite's backup facilities, not a copy of just the main file while WAL is active. Do not scale this deployment across independent replicas or treat it as a multi-tenant service.
 
@@ -41,3 +41,7 @@ The pinned toolkit uses Zod v3 schema internals. A small tracked patch imports t
 Run `pnpm smoke:production` after building to reproduce the HTTP checks. It starts a temporary loopback server with a randomly generated test password, performs read-only checks and rejected-mutation checks, saves its report under ignored `workspace/`, then stops its server. CI runs the same command after the production build.
 
 Docker execution could not be verified on this machine because Docker is not installed. The requested verification scope was confirmed as local only; no public deployment was attempted. These checks establish local production-server behavior, not the status of an external deployment. The development preview remains available at http://localhost:3000; the smoke test stops its own temporary production server afterward.
+
+## Render shows “Production access is not configured”
+
+This means the deployed service has no SUNDOWN_ADMIN_PASSWORD of at least 16 characters. A successful build does not provision dashboard environment variables. Blueprint generateValue applies when using the Blueprint; manually creating a Docker Web Service does not apply render.yaml automatically. In the service’s Environment panel, set SUNDOWN_ADMIN_PASSWORD and SUNDOWN_APP_URL to the actual HTTPS origin, then choose Save and deploy. Log in with username sundown and your chosen password. Do not commit the password. The public landing stays available; private workspace browsers show a setup page while API clients retain a 503 JSON error.

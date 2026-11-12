@@ -75,6 +75,7 @@ try {
     ...Array.from({ length: 12 }, (_, i) => "/passport/" + (i + 1)),
   ])
     await check(route);
+  await check("/", 200, {}, false);
   await check("/overview", 401, {}, false);
   await check("/api/state", 401, {}, false);
   await check("/api/health", 200, {}, false);

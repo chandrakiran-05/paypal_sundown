@@ -10,6 +10,31 @@ const request = (pathname = "/api/state", init: RequestInit = {}) =>
 const authorization =
   "Basic " +
   Buffer.from("sundown:" + env.SUNDOWN_ADMIN_PASSWORD).toString("base64");
+it("serves the public static landing without exposing workspace APIs or mutations", () => {
+  expect(checkAccess(request("/"), { NODE_ENV: "production" })).toBeNull();
+  expect(checkAccess(request("/", { method: "HEAD" }), env)).toBeNull();
+  expect(
+    checkAccess(request("/", { method: "POST" }), { NODE_ENV: "production" })
+      ?.status,
+  ).toBe(503);
+  expect(
+    checkAccess(request("/api/state"), { NODE_ENV: "production" })?.status,
+  ).toBe(503);
+});
+it("shows a setup page for browsers and preserves JSON errors for API clients", async () => {
+  const response = checkAccess(
+    request("/overview", { headers: { accept: "text/html" } }),
+    { NODE_ENV: "production" },
+  );
+  expect(response?.status).toBe(503);
+  expect(response?.headers.get("Content-Type")).toContain("text/html");
+  expect(await response?.text()).toContain("Workspace setup required");
+  expect(
+    checkAccess(request(), { NODE_ENV: "production" })?.headers.get(
+      "Content-Type",
+    ),
+  ).toContain("application/json");
+});
 it("fails closed in production, preserves development, and challenges unauthenticated clients", () => {
   expect(checkAccess(request(), { NODE_ENV: "production" })?.status).toBe(503);
   expect(checkAccess(request(), { NODE_ENV: "development" })).toBeNull();
