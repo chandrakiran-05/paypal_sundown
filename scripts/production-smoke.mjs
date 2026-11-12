@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs";
@@ -10,16 +10,16 @@ const child = spawn(
   [
     require.resolve("next/dist/bin/next"),
     "start",
-    "--port",
-    "3004",
+    "apps/web",
     "--hostname",
     "127.0.0.1",
   ],
   {
-    cwd: "apps/web",
+    cwd: process.cwd(),
     env: {
       ...process.env,
       NODE_ENV: "production",
+      PORT: "3004",
       SUNDOWN_ADMIN_PASSWORD: password,
       SUNDOWN_APP_URL: origin,
     },
@@ -79,6 +79,7 @@ try {
   await check("/api/state", 401, {}, false);
   await check("/api/health", 200, {}, false);
   const state = await (await check("/api/state")).json();
+  await check("/api/shopping-agent");
   const passport = await (await check("/api/passports/1?format=json")).json();
   await check("/api/passports/1?format=pdf");
   for (const format of ["json", "html", "postman"])
@@ -112,7 +113,19 @@ try {
   const reader = stream.body.getReader();
   const message = await reader.read();
   await reader.cancel();
+  let runtimeRssMiB = null;
+  try {
+    runtimeRssMiB =
+      Number(
+        execFileSync("ps", ["-o", "rss=", "-p", String(child.pid)], {
+          encoding: "utf8",
+        }).trim(),
+      ) / 1024;
+  } catch {
+    /* Memory sampling is optional on platforms without ps. */
+  }
   const result = {
+    runtimeRssMiB,
     checks: results,
     passed: results.every((r) => r.pass),
     streamReceived: !!message.value?.length,

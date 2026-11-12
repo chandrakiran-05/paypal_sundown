@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "pnpm --filter @sundown/web dev",
     "build": "pnpm --filter @sundown/web build",
-    "start": "pnpm --filter @sundown/web start",
+    "start": "node node_modules/next/dist/bin/next start apps/web --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",

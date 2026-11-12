@@ -11,7 +11,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: pnpm
+          # Install from the frozen lockfile without setup-node's pnpm cache.
+          # Its post-job cache save fails when the discovered store is absent.
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint

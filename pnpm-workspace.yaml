@@ -1,6 +1,8 @@
 packages:
   - apps/web
   - packages/*
+# Installs belong to the build phase, never an implicit production start.
+verifyDepsBeforeRun: false
 # Only the OpenAI function-tool adapter is used; exclude unused vendor adapters.
 overrides:
   "@paypal/agent-toolkit>ai": "-"

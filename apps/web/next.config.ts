@@ -2,9 +2,12 @@
 import type { NextConfig } from "next";
 import dotenv from "dotenv";
 import path from "node:path";
+const workspaceRoot = process.cwd().endsWith(path.join("apps", "web"))
+  ? path.resolve(process.cwd(), "../..")
+  : process.cwd();
 // Next has already loaded apps/web/.env.local; explicit process/web values take precedence.
 dotenv.config({
-  path: path.resolve(process.cwd(), "../../.env.local"),
+  path: path.join(workspaceRoot, ".env.local"),
   quiet: true,
 });
 const config: NextConfig = {
@@ -18,7 +21,7 @@ const config: NextConfig = {
   },
   transpilePackages: ["@sundown/engine", "@sundown/agents"],
   serverExternalPackages: ["node:sqlite", "@paypal/agent-toolkit"],
-  outputFileTracingRoot: process.cwd() + "/../..",
+  outputFileTracingRoot: workspaceRoot,
   poweredByHeader: false,
   async headers() {
     return [
