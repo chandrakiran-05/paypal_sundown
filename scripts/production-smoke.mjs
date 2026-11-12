@@ -77,12 +77,47 @@ try {
   ])
     await check(route);
   await check("/", 200, {}, false);
+  await check("/demo", 200, {}, false);
+  await check("/login", 200, {}, false);
+  const redirect = await check(
+    "/overview",
+    303,
+    { redirect: "manual", headers: { accept: "text/html" } },
+    false,
+  );
+  if (redirect.headers.has("WWW-Authenticate"))
+    throw new Error("Browser authentication challenge is forbidden");
+  const login = await check(
+    "/api/auth/login",
+    200,
+    {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({ password }),
+    },
+    false,
+  );
+  const cookie = login.headers.get("set-cookie")?.split(";")[0];
+  if (!cookie) throw new Error("Login did not issue a session");
+  await check("/api/state", 200, { headers: { cookie } }, false);
+  await check(
+    "/api/auth/login",
+    200,
+    { method: "DELETE", headers: { origin, cookie } },
+    false,
+  );
+
   await check("/overview", 401, {}, false);
   await check("/api/state", 401, {}, false);
   await check("/api/businesses", 401, {}, false);
   await check("/api/assessments", 401, {}, false);
   await check("/api/paypal/onboarding/return", 401, { method: "POST" }, false);
-  await check("/api/paypal/onboarding/return?state=invalid", 303, { redirect: "manual" }, false);
+  await check(
+    "/api/paypal/onboarding/return?state=invalid",
+    303,
+    { redirect: "manual" },
+    false,
+  );
   await check("/onboarding/result?status=invalid", 200, {}, false);
   await check("/api/health", 200, {}, false);
   const state = await (await check("/api/state")).json();

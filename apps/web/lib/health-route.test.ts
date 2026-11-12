@@ -6,13 +6,13 @@ afterEach(() => {
   vi.unstubAllEnvs();
   vi.mocked(getFlag).mockReset();
 });
-it("does not declare a production deployment ready without valid access configuration", async () => {
+it("keeps the public demo healthy when private admin access is not configured", async () => {
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", "");
-  expect(GET().status).toBe(503);
-  expect(getFlag).not.toHaveBeenCalled();
+  expect(GET().status).toBe(200);
+  expect(await GET().json()).toMatchObject({ adminConfigured: false });
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", "short");
-  expect(GET().status).toBe(503);
+  expect(GET().status).toBe(200);
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", "long-test-password-1234");
   expect(GET().status).toBe(200);
 });

@@ -1,19 +1,17 @@
 import { getFlag } from "../../../lib/store";
-import { accessConfigured } from "../../../lib/access";
 export const dynamic = "force-dynamic";
 export function GET() {
   try {
-    if (!accessConfigured())
-      return Response.json(
-        {
-          status: "unavailable",
-          reason: "Production access is not configured",
-        },
-        { status: 503, headers: { "Cache-Control": "no-store" } },
-      );
     getFlag("migrated");
     return Response.json(
-      { status: "ok" },
+      {
+        status: "ok",
+        demo: "available",
+        adminConfigured: Boolean(
+          process.env.SUNDOWN_ADMIN_PASSWORD &&
+          process.env.SUNDOWN_ADMIN_PASSWORD.length >= 16,
+        ),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {

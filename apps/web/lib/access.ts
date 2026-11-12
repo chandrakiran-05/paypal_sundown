@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
+import { adminCookie, validAdminSession } from "./admin-session";
 
 export function accessConfigured(
   env: Record<string, string | undefined> = process.env,
@@ -26,25 +27,34 @@ export function checkAccess(
     ["GET", "HEAD"].includes(request.method)
   )
     return null;
-  if (url.pathname === "/" && ["GET", "HEAD"].includes(request.method))
+  if (
+    ["/", "/demo", "/login"].includes(url.pathname) &&
+    ["GET", "HEAD"].includes(request.method)
+  )
     return null;
   if (url.pathname === "/api/webhooks" || url.pathname === "/api/health")
     return null;
+  if (
+    url.pathname === "/api/auth/login" &&
+    ["POST", "DELETE"].includes(request.method)
+  )
+    return null;
   const password = env.SUNDOWN_ADMIN_PASSWORD;
+  const browser =
+    ["GET", "HEAD"].includes(request.method) &&
+    !url.pathname.startsWith("/api/") &&
+    request.headers.get("accept")?.includes("text/html");
+  const loginRedirect = () =>
+    new Response(null, {
+      status: 303,
+      headers: {
+        Location: new URL("/login", url).href,
+        "Cache-Control": "no-store",
+      },
+    });
   if (!password && env.NODE_ENV !== "production") return null;
   if (!accessConfigured(env)) {
-    if (request.headers.get("accept")?.includes("text/html"))
-      return new Response(
-        '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sundown — workspace setup required</title><body style="background:#101710;color:#e6ebdf;font:18px system-ui;max-width:640px;margin:12vh auto;padding:24px"><h1>Workspace setup required</h1><p>The server is running. Its administrator needs to configure production access in the hosting environment before the workspace can open.</p><p>Set SUNDOWN_ADMIN_PASSWORD to at least 16 characters, then redeploy. Never commit the password to Git.</p><a href="/" style="color:#eca16f">Return to Sundown</a></body></html>',
-        {
-          status: 503,
-          headers: {
-            "Content-Type": "text/html; charset=utf-8",
-            "Cache-Control": "no-store",
-            "Retry-After": "60",
-          },
-        },
-      );
+    if (browser) return loginRedirect();
     return Response.json(
       { error: "Production access is not configured" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
@@ -55,17 +65,26 @@ export function checkAccess(
     ? Buffer.from(authorization.slice(6), "base64")
     : Buffer.alloc(0);
   const expected = Buffer.from(`sundown:${password}`);
+  const token =
+    request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((v) => v.trim())
+      .find((v) => v.startsWith(adminCookie + "="))
+      ?.slice(adminCookie.length + 1) || "";
   if (
-    provided.length !== expected.length ||
-    !timingSafeEqual(provided, expected)
-  )
+    !validAdminSession(token, password!) &&
+    (provided.length !== expected.length ||
+      !timingSafeEqual(provided, expected))
+  ) {
+    if (browser) return loginRedirect();
     return new Response("Authentication required", {
       status: 401,
       headers: {
-        "WWW-Authenticate": 'Basic realm="Sundown", charset="UTF-8"',
         "Cache-Control": "no-store",
       },
     });
+  }
   if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
     const origin = request.headers.get("origin");
     const allowed = new URL(env.SUNDOWN_APP_URL || request.url).origin;

@@ -1,3 +1,7 @@
+## Public judge walkthrough
+
+Open `/demo` without an account, credentials or hosting configuration. Inspect the reference checkout, review its dependency plan, then run replay verification to move from five to six matching scenarios. Open scenario details and download the synthetic JSON report. Reset starts again. All data is committed reference material and all interactions stay in the browser; no private business records or real payments are accessed. The private operator workspace is available through the website form at `/login` if an admin password is configured.
+
 # Three-minute demo
 
 ## Recommended judge walkthrough

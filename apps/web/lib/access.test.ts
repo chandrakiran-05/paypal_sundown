@@ -21,14 +21,15 @@ it("serves the public static landing without exposing workspace APIs or mutation
     checkAccess(request("/api/state"), { NODE_ENV: "production" })?.status,
   ).toBe(503);
 });
-it("shows a setup page for browsers and preserves JSON errors for API clients", async () => {
+it("shows an in-website login for browsers and preserves JSON errors for API clients", async () => {
   const response = checkAccess(
     request("/overview", { headers: { accept: "text/html" } }),
     { NODE_ENV: "production" },
   );
-  expect(response?.status).toBe(503);
-  expect(response?.headers.get("Content-Type")).toContain("text/html");
-  expect(await response?.text()).toContain("Workspace setup required");
+  expect(response?.status).toBe(303);
+  expect(response?.headers.get("Location")).toBe(
+    "https://sundown.example/login",
+  );
   expect(
     checkAccess(request(), { NODE_ENV: "production" })?.headers.get(
       "Content-Type",
@@ -41,7 +42,7 @@ it("fails closed in production, preserves development, and challenges unauthenti
   expect(checkAccess(request(), env)?.status).toBe(401);
   expect(
     checkAccess(request(), env)?.headers.get("WWW-Authenticate"),
-  ).toContain("Basic");
+  ).toBeNull();
   expect(
     checkAccess(request(), { ...env, SUNDOWN_ADMIN_PASSWORD: "short" })?.status,
   ).toBe(503);
@@ -101,4 +102,15 @@ it("allows only the exact seller callback and safe public result, keeping busine
   ).toBe(401);
   expect(checkAccess(request("/api/businesses"), env)?.status).toBe(401);
   expect(checkAccess(request("/api/assessments"), env)?.status).toBe(401);
+});
+
+it("opens the public judge demo and login without admin configuration", () => {
+  for (const pathname of ["/demo", "/login"])
+    expect(
+      checkAccess(request(pathname), { NODE_ENV: "production" }),
+    ).toBeNull();
+  expect(checkAccess(request("/demo/other"), env)?.status).toBe(401);
+  expect(
+    checkAccess(request("/api/auth/login", { method: "POST" }), env),
+  ).toBeNull();
 });

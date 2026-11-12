@@ -25,8 +25,8 @@ export default function Landing() {
         <div>
           <a href="#how">The process</a>
           <a href="#proof">Built on evidence</a>
-          <Link className="button small" href="/overview">
-            Open workspace <ArrowUpRight size={15} />
+          <Link className="button small" href="/demo">
+            Open Judge Demo <ArrowUpRight size={15} />
           </Link>
         </div>
       </nav>
@@ -48,8 +48,8 @@ export default function Landing() {
               <br className="desktop" /> prepare for agentic commerce.
             </p>
             <div className="hero-actions">
-              <Link className="button" href="/overview">
-                Explore the workspace <ArrowRight size={17} />
+              <Link className="button" href="/demo">
+                Try the Judge Demo <ArrowRight size={17} />
               </Link>
               <span className="mono muted">NO CREDENTIALS NEEDED</span>
             </div>
@@ -140,7 +140,7 @@ export default function Landing() {
             Replay data is synthetic and clearly labelled. Live sandbox evidence
             is never inferred from fixtures.
           </p>
-          <Link href="/parity" className="text-link">
+          <Link href="/demo" className="text-link">
             Inspect the evidence <ArrowUpRight size={16} />
           </Link>
         </section>
