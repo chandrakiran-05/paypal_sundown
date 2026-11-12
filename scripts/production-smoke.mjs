@@ -79,11 +79,20 @@ try {
     await check(route);
   await check("/", 200, {}, false);
   await check("/demo", 307, { redirect: "manual" }, false);
-  await check("/login", 200, {}, false);
+  await check("/login", 307, { redirect: "manual" }, false);
   const redirect = await check(
     "/overview",
-    303,
+    200,
     { redirect: "manual", headers: { accept: "text/html" } },
+    false,
+  );
+  const automaticCookie = redirect.headers.get("set-cookie")?.split(";")[0];
+  if (!automaticCookie)
+    throw new Error("Automatic entry did not issue a session");
+  await check(
+    "/api/state",
+    200,
+    { headers: { cookie: automaticCookie } },
     false,
   );
   if (redirect.headers.has("WWW-Authenticate"))

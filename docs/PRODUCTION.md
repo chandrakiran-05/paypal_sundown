@@ -18,7 +18,7 @@ The production entrypoint does not invoke pnpm/Corepack or download dependencies
 
 Use Node 24 and the pinned pnpm version. Install with `pnpm install --frozen-lockfile`, then run `pnpm build` and `pnpm start`. The landing is public. `/login` opens the full original workspace; old `/demo` links redirect to `/overview`. Website login uses an HttpOnly, SameSite session lasting eight hours, without browser authentication popups. Configure `SUNDOWN_ADMIN_PASSWORD` (at least 16 characters) through the hosting secret store. The real admin password is never displayed. Changing it invalidates admin sessions. Basic authorization headers remain supported for CLI automation. Use HTTPS for non-loopback deployments.
 
-Optional `SUNDOWN_SHARED_ACCESS=true` displays a separate shared workspace password beneath the login form. This grants public access to all workspace records and actions. It is disabled by default; enable it only for an intentionally public deployment containing showcase data. PayPal stays sandbox-only.
+Public showcase access is enabled by default: browser navigation automatically issues a session, and `/login` redirects to the workspace. This grants public access to all workspace records and sandbox controls. Use only showcase data. Set `SUNDOWN_SHARED_ACCESS=false` for a private deployment. PayPal stays sandbox-only.
 
 Set `SUNDOWN_APP_URL` to the actual public HTTPS origin so authenticated browser mutations pass the same-origin check. Keep secrets server-side. The public AG Studio license is compiled at build time using `NEXT_PUBLIC_AG_GRID_LICENSE_KEY` (the root environment's existing license aliases still work for local builds). Docker accepts the corresponding build argument. Supply licensed Bryntum distribution assets before commercial use; the repository currently installs the trial package.
 
@@ -42,7 +42,7 @@ The pinned toolkit uses Zod v3 schema internals. A small tracked patch imports t
 
 ## Verification evidence
 
-- Frozen-lockfile install, typecheck, lint, all 133 tests across twenty files, production build and runtime dependency audit passed. The runtime audit reports no known vulnerabilities.
+- Frozen-lockfile install, typecheck, lint, all 135 tests across twenty-one files, production build and runtime dependency audit passed. The runtime audit reports no known vulnerabilities.
 - Production HTTP server: all 22 product pages returned 200 with authentication; unauthenticated evidence routes returned 401; cross-origin mutation returned 403; malformed/unsigned webhooks returned 400.
 - JSON/PDF Passport exports, JSON/HTML/Postman report exports, event streaming and health endpoint passed. Production server logs contained no errors.
 - Browser checks rendered the live/replay matrix and Passport without console warnings or errors. Live Events retain the neutral IPN-unreachable note.
@@ -54,4 +54,4 @@ Docker execution could not be verified on this machine because Docker is not ins
 
 ## Render shows “Production access is not configured”
 
-Private deployments require `SUNDOWN_ADMIN_PASSWORD` of at least 16 characters for workspace access. Set it through Render Environment, set `SUNDOWN_APP_URL` to the actual HTTPS origin, then Save and deploy. Use the website form at `/login`. Optional shared access works without an admin password only when `SUNDOWN_SHARED_ACCESS=true` is explicitly configured. Never display or commit the real admin secret.
+Private deployments require `SUNDOWN_ADMIN_PASSWORD` of at least 16 characters for workspace access. Set it through Render Environment, set `SUNDOWN_APP_URL` to the actual HTTPS origin, then Save and deploy. Use the website form at `/login`. Optional shared access works without an admin password unless `SUNDOWN_SHARED_ACCESS=false` disables public access. Never display or commit the real admin secret.

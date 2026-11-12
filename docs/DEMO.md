@@ -2,7 +2,7 @@
 
 Open `/login` to access the full workspace: Overview, Connect, Plan, Parity, Readiness, Portfolio, Agent Checkout and Migration Passports. There is no separate reduced demo; old `/demo` links redirect to the workspace. Existing sandbox, replay and simulated evidence retain their individual labels. Partner onboarding requires approved partner credentials.
 
-Use the server-configured `SUNDOWN_ADMIN_PASSWORD` to sign in. Optional `SUNDOWN_SHARED_ACCESS=true` displays `Sundown-Workspace-2026` beneath the same form. This grants public access to workspace records and actions, so use only showcase data when enabled. Shared access is disabled by default. The real admin password and PayPal credentials are never displayed.
+The public showcase automatically opens the workspace without a password form. `/login` redirects to `/overview`, which issues a browser session. This grants public access to workspace records and sandbox controls, so use only showcase data. Set `SUNDOWN_SHARED_ACCESS=false` and configure `SUNDOWN_ADMIN_PASSWORD` for private access through the website login. Admin and PayPal credentials are never displayed.
 
 # Three-minute demo
 
