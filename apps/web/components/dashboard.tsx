@@ -443,7 +443,7 @@ export default function Dashboard({
                       </div>
                     </div>
                     <aside>
-                      <span>THE JUDGE WALKTHROUGH</span>
+                      <span>MIGRATION WORKFLOW</span>
                       <strong>Connection → plan → proof</strong>
                       <p>
                         Inspect the source findings, compare six checkout

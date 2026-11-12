@@ -1,3 +1,4 @@
+import { workspacePassword } from "./workspace-access";
 import { it, expect } from "vitest";
 import {
   adminCookie,
@@ -48,6 +49,46 @@ it("allows signed website sessions but rejects unsigned cookies and cross-origin
   expect(
     checkAccess(
       new Request(env.SUNDOWN_APP_URL + "/api/action", {
+        method: "POST",
+        headers: { cookie, origin: "https://evil.example" },
+      }),
+      env,
+    )?.status,
+  ).toBe(403);
+});
+
+it("supports explicitly enabled shared access to all workspace features", () => {
+  const env = { NODE_ENV: "production", SUNDOWN_SHARED_ACCESS: "true" };
+  const cookie = `${adminCookie}=${createAdminSession(workspacePassword)}`;
+  for (const route of [
+    "/overview",
+    "/connect",
+    "/plan",
+    "/parity",
+    "/readiness",
+    "/portfolio",
+    "/agent-demo",
+    "/passport",
+    "/api/state",
+    "/api/businesses",
+    "/api/assessments",
+    "/api/shopping-agent",
+  ])
+    expect(
+      checkAccess(
+        new Request("https://sundown.example" + route, { headers: { cookie } }),
+        env,
+      ),
+    ).toBeNull();
+  expect(
+    checkAccess(
+      new Request("https://sundown.example/api/state", { headers: { cookie } }),
+      { ...env, SUNDOWN_SHARED_ACCESS: "false" },
+    )?.status,
+  ).toBe(503);
+  expect(
+    checkAccess(
+      new Request("https://sundown.example/api/action", {
         method: "POST",
         headers: { cookie, origin: "https://evil.example" },
       }),

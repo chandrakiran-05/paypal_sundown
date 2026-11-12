@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { adminCookie, validAdminSession } from "./admin-session";
+import { workspacePassword, sharedAccessEnabled } from "./workspace-access";
 
 export function accessConfigured(
   env: Record<string, string | undefined> = process.env,
@@ -52,8 +53,17 @@ export function checkAccess(
         "Cache-Control": "no-store",
       },
     });
+  const token =
+    request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((v) => v.trim())
+      .find((v) => v.startsWith(adminCookie + "="))
+      ?.slice(adminCookie.length + 1) || "";
+  const sharedAuthenticated =
+    sharedAccessEnabled(env) && validAdminSession(token, workspacePassword);
   if (!password && env.NODE_ENV !== "production") return null;
-  if (!accessConfigured(env)) {
+  if (!accessConfigured(env) && !sharedAuthenticated) {
     if (browser) return loginRedirect();
     return Response.json(
       { error: "Production access is not configured" },
@@ -65,15 +75,9 @@ export function checkAccess(
     ? Buffer.from(authorization.slice(6), "base64")
     : Buffer.alloc(0);
   const expected = Buffer.from(`sundown:${password}`);
-  const token =
-    request.headers
-      .get("cookie")
-      ?.split(";")
-      .map((v) => v.trim())
-      .find((v) => v.startsWith(adminCookie + "="))
-      ?.slice(adminCookie.length + 1) || "";
   if (
-    !validAdminSession(token, password!) &&
+    !sharedAuthenticated &&
+    !validAdminSession(token, password || "") &&
     (provided.length !== expected.length ||
       !timingSafeEqual(provided, expected))
   ) {

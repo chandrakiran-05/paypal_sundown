@@ -2,6 +2,7 @@ import { beforeAll, afterAll, it, expect, vi } from "vitest";
 import { mkdtempSync, rmSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { workspacePassword } from "./workspace-access";
 import { adminCookie, validAdminSession } from "./admin-session";
 const testRoot = mkdtempSync(path.join(tmpdir(), "sundown-login-"));
 vi.mock("./store", () => ({ root: testRoot }));
@@ -16,6 +17,7 @@ const request = (value: unknown, origin = "https://sundown.example") =>
 beforeAll(async () => {
   mkdirSync(path.join(testRoot, "workspace"));
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", password);
+  vi.stubEnv("SUNDOWN_SHARED_ACCESS", "true");
   vi.stubEnv("SUNDOWN_APP_URL", "https://sundown.example");
   api = await import("../app/api/auth/login/route");
 });
@@ -41,7 +43,7 @@ it("issues a secure signed session through the website form and expires it on lo
     "Max-Age=0",
   );
 });
-it("rejects missing configuration, malformed input and foreign origins", async () => {
+it("rejects incorrect passwords, malformed input and foreign origins", async () => {
   expect(
     (await api.POST(request({ password }, "https://evil.example"))).status,
   ).toBe(403);
@@ -50,7 +52,18 @@ it("rejects missing configuration, malformed input and foreign origins", async (
     413,
   );
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", "");
-  expect((await api.POST(request({ password }))).status).toBe(503);
+  expect((await api.POST(request({ password }))).status).toBe(401);
+  const judge = await api.POST(request({ password: workspacePassword }));
+  expect(judge.status).toBe(200);
+  expect(
+    validAdminSession(
+      judge.headers
+        .get("set-cookie")!
+        .split(";")[0]
+        .slice(adminCookie.length + 1),
+      workspacePassword,
+    ),
+  ).toBe(true);
   vi.stubEnv("SUNDOWN_ADMIN_PASSWORD", password);
 });
 it("rate limits repeated incorrect passwords without browser authentication challenges", async () => {

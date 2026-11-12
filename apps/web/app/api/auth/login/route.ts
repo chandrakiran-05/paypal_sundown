@@ -1,4 +1,8 @@
 import path from "node:path";
+import {
+  sharedAccessEnabled,
+  workspacePassword,
+} from "../../../../lib/workspace-access";
 import { openDatabase, initializeSchema } from "../../../../lib/database";
 import { root } from "../../../../lib/store";
 import {
@@ -20,14 +24,6 @@ export async function POST(request: Request) {
     return Response.json(
       { error: "Cross-origin login denied" },
       { status: 403 },
-    );
-  const secret = process.env.SUNDOWN_ADMIN_PASSWORD;
-  if (!secret || secret.length < 16)
-    return Response.json(
-      {
-        error: "Admin login is not configured. Judges can use the public demo.",
-      },
-      { status: 503 },
     );
   try {
     const reader = request.body?.getReader();
@@ -57,6 +53,13 @@ export async function POST(request: Request) {
       data.password.length > 1024
     )
       return Response.json({ error: "Invalid login" }, { status: 400 });
+    const adminPassword = process.env.SUNDOWN_ADMIN_PASSWORD;
+    const secret =
+      sharedAccessEnabled() && passwordMatches(data.password, workspacePassword)
+        ? workspacePassword
+        : adminPassword && adminPassword.length >= 16
+          ? adminPassword
+          : "";
     const now = Date.now();
     db.prepare(
       "INSERT INTO admin_login_attempts VALUES(1,0,?) ON CONFLICT(id) DO UPDATE SET attempts=CASE WHEN until<=? THEN 0 ELSE attempts END,until=CASE WHEN until<=? THEN ? ELSE until END",
@@ -71,7 +74,7 @@ export async function POST(request: Request) {
         { error: "Too many attempts. Try again in one minute." },
         { status: 429, headers: { "Retry-After": "60" } },
       );
-    if (!passwordMatches(data.password, secret))
+    if (!secret || !passwordMatches(data.password, secret))
       return Response.json({ error: "Incorrect password" }, { status: 401 });
     db.prepare("UPDATE admin_login_attempts SET attempts=0 WHERE id=1").run();
     return Response.json(

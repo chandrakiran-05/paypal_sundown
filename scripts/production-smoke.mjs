@@ -21,6 +21,7 @@ const child = spawn(
       NODE_ENV: "production",
       PORT: "3004",
       SUNDOWN_ADMIN_PASSWORD: password,
+      SUNDOWN_SHARED_ACCESS: "true",
       SUNDOWN_APP_URL: origin,
     },
     stdio: ["ignore", "pipe", "pipe"],
@@ -77,7 +78,7 @@ try {
   ])
     await check(route);
   await check("/", 200, {}, false);
-  await check("/demo", 200, {}, false);
+  await check("/demo", 307, { redirect: "manual" }, false);
   await check("/login", 200, {}, false);
   const redirect = await check(
     "/overview",
@@ -100,6 +101,31 @@ try {
   const cookie = login.headers.get("set-cookie")?.split(";")[0];
   if (!cookie) throw new Error("Login did not issue a session");
   await check("/api/state", 200, { headers: { cookie } }, false);
+  const judgeLogin = await check(
+    "/api/auth/login",
+    200,
+    {
+      method: "POST",
+      headers: { origin, "content-type": "application/json" },
+      body: JSON.stringify({ password: "Sundown-Workspace-2026" }),
+    },
+    false,
+  );
+  const judgeCookie = judgeLogin.headers.get("set-cookie")?.split(";")[0];
+  if (!judgeCookie) throw new Error("Judge login did not issue a session");
+  for (const route of [
+    "/overview",
+    "/connect",
+    "/plan",
+    "/parity",
+    "/readiness",
+    "/portfolio",
+    "/agent-demo",
+    "/passport",
+    "/api/state",
+  ])
+    await check(route, 200, { headers: { cookie: judgeCookie } }, false);
+
   await check(
     "/api/auth/login",
     200,

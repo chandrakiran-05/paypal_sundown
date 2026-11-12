@@ -1,6 +1,8 @@
-## Public judge walkthrough
+## Workspace access
 
-Open `/demo` without an account, credentials or hosting configuration. Inspect the reference checkout, review its dependency plan, then run replay verification to move from five to six matching scenarios. Open scenario details and download the synthetic JSON report. Reset starts again. All data is committed reference material and all interactions stay in the browser; no private business records or real payments are accessed. The private operator workspace is available through the website form at `/login` if an admin password is configured.
+Open `/login` to access the full workspace: Overview, Connect, Plan, Parity, Readiness, Portfolio, Agent Checkout and Migration Passports. There is no separate reduced demo; old `/demo` links redirect to the workspace. Existing sandbox, replay and simulated evidence retain their individual labels. Partner onboarding requires approved partner credentials.
+
+Use the server-configured `SUNDOWN_ADMIN_PASSWORD` to sign in. Optional `SUNDOWN_SHARED_ACCESS=true` displays `Sundown-Workspace-2026` beneath the same form. This grants public access to workspace records and actions, so use only showcase data when enabled. Shared access is disabled by default. The real admin password and PayPal credentials are never displayed.
 
 # Three-minute demo
 
