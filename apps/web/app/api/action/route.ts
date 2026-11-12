@@ -11,10 +11,13 @@ import {
 export async function POST(request: Request) {
   try {
     const { action } = z
-      .object({ action: z.enum(["migrate", "parity", "canary", "reset"]) })
+      .object({
+        action: z.enum(["migrate", "parity", "replay", "canary", "reset"]),
+      })
       .parse(await request.json());
     if (action === "migrate") migrate();
     if (action === "parity") await runParity();
+    if (action === "replay") await runParity({ allowInLive: true });
     if (action === "canary") await simulateCanary();
     if (action === "reset") {
       if (getFlag("running") === "true")

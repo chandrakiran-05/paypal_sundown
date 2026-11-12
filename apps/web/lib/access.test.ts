@@ -83,3 +83,22 @@ it("leaves signature-authenticated webhooks and minimal health checks reachable,
   expect(checkAccess(request("/api/health"), env)).toBeNull();
   expect(checkAccess(request("/api/webhooks/other"), env)?.status).toBe(401);
 });
+it("allows only the exact seller callback and safe public result, keeping business records private", () => {
+  expect(
+    checkAccess(request("/api/paypal/onboarding/return?state=opaque"), env),
+  ).toBeNull();
+  expect(
+    checkAccess(request("/onboarding/result?status=pending"), env),
+  ).toBeNull();
+  expect(
+    checkAccess(
+      request("/api/paypal/onboarding/return", { method: "POST" }),
+      env,
+    )?.status,
+  ).toBe(401);
+  expect(
+    checkAccess(request("/api/paypal/onboarding/return/other"), env)?.status,
+  ).toBe(401);
+  expect(checkAccess(request("/api/businesses"), env)?.status).toBe(401);
+  expect(checkAccess(request("/api/assessments"), env)?.status).toBe(401);
+});

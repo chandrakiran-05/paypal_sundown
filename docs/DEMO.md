@@ -1,5 +1,14 @@
 # Three-minute demo
 
+## Recommended judge walkthrough
+
+1. Open `/connect`. Enter a sample business name and upload `apps/web/public/examples/legacy-checkout.php` (also downloadable in the form). Show the five actual file/line findings, suggested dependencies, and JSON download. Explain that raw source is not stored and no migration/payment was executed for this business.
+2. Show the optional PayPal connection panel. With no partner credentials it honestly shows setup required. Approved partners can generate a seller invitation, obtain consent on PayPal and verify permissions server-side. Do not present fixture tests of onboarding as a real partner connection.
+3. Open Overview and follow the five-step journey. Review Plan, then Checkout tests. Run demo tests: the synthetic verifier/Planner loop does not charge PayPal or overwrite retained live receipts. Open a live row to show its actual order/capture/refund evidence and neutral legacy IPN Events note.
+4. Open Migration Passport and download evidence. Explain that Horizon receipts belong only to the reference demo. Source assessments and partner connection records remain separate.
+
+The extra Demo Tools navigation contains the launch checklist, seeded portfolio and agent checkout. These capabilities stay available without competing with the main walkthrough.
+
 **0:00–0:30** Open `/`. “Sundown moves legacy checkout to Orders v2, with evidence.” Observe the procedural horizon. Open workspace. Point to Replay data and the synthetic-fixture disclosure.
 
 **0:30–1:00** Overview: source findings, 5/6 parity baseline, conversion pipeline and AG Studio custom widgets. Click a node; show field-level differences. Ask “Which flows still fail refund parity?” The deterministic assistant identifies the duplicate-callback mismatch.

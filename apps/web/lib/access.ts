@@ -16,6 +16,16 @@ export function checkAccess(
   env: Record<string, string | undefined> = process.env,
 ): Response | null {
   const url = new URL(request.url);
+  if (
+    url.pathname === "/api/paypal/onboarding/return" &&
+    request.method === "GET"
+  )
+    return null;
+  if (
+    url.pathname === "/onboarding/result" &&
+    ["GET", "HEAD"].includes(request.method)
+  )
+    return null;
   if (url.pathname === "/" && ["GET", "HEAD"].includes(request.method))
     return null;
   if (url.pathname === "/api/webhooks" || url.pathname === "/api/health")

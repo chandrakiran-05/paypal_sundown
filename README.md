@@ -68,6 +68,14 @@ The legacy shop is started with `php -S` on a loopback port. Supply its separate
 
 Reports live under `workspace/live-sandbox/<run-id>/report.json` and feed the Migration Passport. Each side/scenario has its own evidence source. Only successful, approved, webhook-settled migrated scenarios get **Live sandbox**; refund also requires a real completed refund ID. Pending/failed attempts keep their IDs and diagnostic labels. Cancellation, decline, duplicate callback and rounding stay **Replay**. An incomplete run exits 1 and cannot establish parity. The passport is reissued with the latest evidence automatically.
 
+## Business intake and judge walkthrough
+
+Start at `/connect`. The operator can enter a business name and assess its actual PHP/JS/TS/TSX/HTML checkout source. Up to ten files are accepted (100 KiB each; 300 KiB total). Findings retain file/line references and suggested review dependencies. Download a JSON assessment with source hashes. Raw code and excerpts are never stored or executed. Zero findings does not certify readiness. Uploaded assessments remain separate from Horizon's source, catalog, replay fixtures and live payment receipts. This is an operator-managed workspace, not self-service multi-tenant SaaS.
+
+Optional PayPal partner onboarding uses sandbox Partner Referrals and server-verified merchant permissions. It requires approved partner access plus `PAYPAL_PARTNER_CLIENT_ID`, `PAYPAL_PARTNER_CLIENT_SECRET`, `PAYPAL_PARTNER_ID` and `PAYPAL_PARTNER_BN_CODE`, with `SUNDOWN_APP_URL` as the callback origin. Standard checkout credentials do not substitute for partner credentials. Without partner configuration the UI shows setup required and creates no fake connections. Sellers approve on PayPal; Sundown never collects their password. Callback state is signed, expiring and single-use; browser return flags cannot mark a seller connected. Connection status is an as-of snapshot, not ongoing revocation monitoring or proof of checkout migration. Review PayPal's [seller onboarding guide](https://developer.paypal.com/platforms/seller-onboarding/before-payment/) before enabling partner access.
+
+The workspace journey is Connect → Inspect → Plan → Verify → Share. “Run demo tests” executes synthetic replay explicitly, even with sandbox mode enabled, while preserving real receipts. Live matrix detail drawers use the same saved live evidence as their row; incomplete steps and neutral Events remain visible.
+
 ## Migration Passport
 
 Production startup, authentication, persistent sandbox webhook configuration and validation limits are documented in [PRODUCTION.md](docs/PRODUCTION.md). `PAYPAL_MODE=live` remains sandbox-only; a production web build does not enable real-money transactions.

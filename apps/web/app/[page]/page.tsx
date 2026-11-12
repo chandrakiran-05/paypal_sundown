@@ -10,6 +10,7 @@ export default async function Product({
   if (
     ![
       "overview",
+      "connect",
       "plan",
       "parity",
       "readiness",

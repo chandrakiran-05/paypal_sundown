@@ -201,9 +201,9 @@ export function migrate() {
     "Rewriter: Orders v2 shop, webhook verification source and catalog.json written; inspect the isolated branch.",
   );
 }
-export async function runParity() {
+export async function runParity(options: { allowInLive?: boolean } = {}) {
   if (getFlag("running") === "true") return;
-  if (process.env.PAYPAL_MODE === "live")
+  if (process.env.PAYPAL_MODE === "live" && !options.allowInLive)
     throw new Error(
       "Run pnpm live:sandbox in a terminal for the two browser-driven live scenarios. Four other scenarios remain Replay.",
     );

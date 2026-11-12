@@ -4,6 +4,14 @@ Sundown is a single-operator, single-instance migration workspace. Production ho
 
 ## Configuration
 
+### Business assessment and partner onboarding
+
+`/connect` supports operator-managed source assessments without PayPal partner credentials. Uploaded source is bounded, analyzed without execution, and discarded; only source hashes, safe findings and suggested tasks are retained in the persistent SQLite workspace. Business assessments never inherit the Horizon demo's transactions or parity status. This is a single-operator workspace, not tenant-isolated customer accounts.
+
+The optional seller connection is sandbox-only. Approved partners configure `PAYPAL_PARTNER_CLIENT_ID`, `PAYPAL_PARTNER_CLIENT_SECRET`, `PAYPAL_PARTNER_ID`, `PAYPAL_PARTNER_BN_CODE`, and the deployed `SUNDOWN_APP_URL`. The callback path is `/api/paypal/onboarding/return`; only this exact GET return and its non-sensitive result page bypass workspace authentication. Signed expiring state, tracking identity, and server-side PayPal permission checks determine status. Missing configuration shows setup required, not a simulated connection. Connected status records the last successful check; continuous consent-revocation monitoring and per-seller payment routing are not implemented. Keep the existing checkout credentials separate.
+
+The new business APIs and uploaded-source reports are protected by the same operator authentication as the workspace. `pnpm smoke:production` verifies both protected endpoints and the narrow public callback boundary; unit tests inject PayPal responses without creating seller grants.
+
 Render must build/install before starting the server. For Docker, leave the dashboard's Docker Command override empty so the Dockerfile's direct Node command runs. For a native Node Web Service, use repository root, Node 24, build command `corepack enable && pnpm install --frozen-lockfile && pnpm build`, and start command `node node_modules/next/dist/bin/next start apps/web --hostname 0.0.0.0`. Do not put install/build commands in the start command. Next reads Render's `PORT` environment variable. No static publish directory is used.
 
 The production entrypoint does not invoke pnpm/Corepack or download dependencies. pnpm's implicit pre-run installs are disabled; installation remains an explicit frozen-lockfile build step. The Docker dependency store is under `/app`, accessible to the non-root runtime user. Slow registry requests are build-network warnings; an “Out of memory (used over 512Mi)” message is an instance memory limit, not a port configuration error. If runtime memory still exceeds the instance limit after correcting startup, choose an instance with sufficient memory rather than raising the Node heap above available RAM.
@@ -32,8 +40,8 @@ The pinned toolkit uses Zod v3 schema internals. A small tracked patch imports t
 
 ## Verification evidence
 
-- Frozen-lockfile install, typecheck, lint, all 83 tests across fifteen files, production build and runtime dependency audit passed. The runtime audit reports no known vulnerabilities.
-- Production HTTP server: all 21 product pages returned 200 with authentication; unauthenticated evidence routes returned 401; cross-origin mutation returned 403; malformed/unsigned webhooks returned 400.
+- Frozen-lockfile install, typecheck, lint, all 126 tests across eighteen files, production build and runtime dependency audit passed. The runtime audit reports no known vulnerabilities.
+- Production HTTP server: all 22 product pages returned 200 with authentication; unauthenticated evidence routes returned 401; cross-origin mutation returned 403; malformed/unsigned webhooks returned 400.
 - JSON/PDF Passport exports, JSON/HTML/Postman report exports, event streaming and health endpoint passed. Production server logs contained no errors.
 - Browser checks rendered the live/replay matrix and Passport without console warnings or errors. Live Events retain the neutral IPN-unreachable note.
 - Local receipts: `workspace/production-validation.json`, `workspace/live-status-validation.json`, and `workspace/production-screenshots/`.

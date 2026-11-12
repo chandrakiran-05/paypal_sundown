@@ -65,6 +65,7 @@ try {
   for (const route of [
     "/",
     "/overview",
+    "/connect",
     "/plan",
     "/parity",
     "/readiness",
@@ -78,9 +79,16 @@ try {
   await check("/", 200, {}, false);
   await check("/overview", 401, {}, false);
   await check("/api/state", 401, {}, false);
+  await check("/api/businesses", 401, {}, false);
+  await check("/api/assessments", 401, {}, false);
+  await check("/api/paypal/onboarding/return", 401, { method: "POST" }, false);
+  await check("/api/paypal/onboarding/return?state=invalid", 303, { redirect: "manual" }, false);
+  await check("/onboarding/result?status=invalid", 200, {}, false);
   await check("/api/health", 200, {}, false);
   const state = await (await check("/api/state")).json();
   await check("/api/shopping-agent");
+  await check("/api/businesses");
+  await check("/api/assessments");
   const passport = await (await check("/api/passports/1?format=json")).json();
   await check("/api/passports/1?format=pdf");
   for (const format of ["json", "html", "postman"])
